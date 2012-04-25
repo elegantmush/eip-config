@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+
+	<!-- Pull in the properties that define the JMS broker, its connection factories and destinations (queues 
+		and topics) -->
+	<context:property-placeholder location="classpath:/jms.properties" />
+
+	<!-- Pull in the jndi environment properties used to create the JNDI initial context -->
+	<util:properties id="jndiEnv" location="classpath:/jndi.properties" />
+
+	<bean id="jmsDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver" />
+
+	<!-- Create Spring beans representing JMS objects (connection factory, destination (queue), based on 
+		JNDI name lookups. These JMS object Spring beans can be referenced by other beans in the overall Spring 
+		container context -->
+
+	<jee:jndi-lookup id="jmsQueue" environment-ref="jndiEnv" jndi-name="${jms.queue.jndi.name}"
+		expected-type="javax.jms.Queue" />
+
+	<jee:jndi-lookup id="targetConnectionFactory" environment-ref="jndiEnv"
+		jndi-name="${jms.connection.factory.jndi.name}" expected-type="javax.jms.ConnectionFactory" />
+
+	<!-- A wrapper bean for the connection factory that can seamlessly handle either case: (1) where a username 
+		and password are required to connect to JMS broker, or (2) no username/password required to connect to 
+		JMS broker -->
+	<bean id="connectionFactory" class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter"
+		p:username="${jms.broker.user}" p:password="${jms.broker.password}" p:targetConnectionFactory-ref="targetConnectionFactory" />
+
+</beans>

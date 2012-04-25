@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.1.xsd
+		http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms-2.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<!-- If using a tool such as STS (SpringSource Tool Suite), you may see warnings related to "Referenced 
+		beans 'jmsQueue', 'connectionFactory' and 'DefaultMessageListenerContainer' not found". These are defined 
+		in jmsContext.xml and this warning could be avoided by importing that context in-line here i.e. adding 
+		<import resource="jmsContext.xml" /> and then only creating a ClasspathXmlApplicationContext taking in 
+		this file, eipContext.xml. However, in order to make it clearer which contexts are being used, hierarchical 
+		context has been avoided, and both jmsContext.xml and eipContext.xml are passed in to the ClasspathXmlApplicationContext 
+		constructor in Main.java's main() method -->
+
+	<!-- to allow spring integration specific annotations such as @MessageEndpoint to be recognised -->
+	<int:annotation-config />
+
+	<!-- component scan for handlers (annotated with @MessageEndpoint). currently only the one, EipInMessageHandler -->
+	<context:component-scan base-package="com.telkau.examples.eip.handler" />
+
+	<!-- channel that is the input to the jms-outbound-channel-adapter. i.e. the last EIP channel, before 
+		switching to transmission over JMS -->
+	<int:channel id="eipOut" />
+
+	<!-- maps outgoing messages from EIP channel 'eipOut' to JMS queue -->
+	<int-jms:outbound-channel-adapter channel="eipOut" destination="jmsQueue" />
+
+	<!-- maps incoming messages from JMS queue to EIP channel 'eipIn' -->
+	<int-jms:message-driven-channel-adapter destination="jmsQueue"
+		channel="eipIn" />
+
+	<!-- channel that is the output of the message-driven-channel-adapter. i.e. the starting point of the 
+		EIP channel architecture for any EIP-based application -->
+	<int:channel id="eipIn" />
+
+	<!-- Service activator, receiving messages from the input channel and processing them in the method 
+		annotated with @ServiceActivator in the referenced Bean eipInMessageHandler. i.e. EipInMessageHandler.java -->
+	<int:service-activator input-channel="eipIn" ref="eipInMessageHandler" />
+</beans>
