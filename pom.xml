@@ -74,11 +74,6 @@
 				<version>${spring.integration.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>cglib</groupId>
-				<artifactId>cglib</artifactId>
-				<version>2.2.2</version>
-			</dependency>
-			<dependency>
 				<groupId>weblogic</groupId>
 				<artifactId>wljmsclient</artifactId>
 				<version>${weblogic.version}</version>
@@ -100,11 +95,6 @@
 		<dependency>
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-jms</artifactId>
-		</dependency>
-		<!-- Required by Spring to process @Configuration annotated classes -->
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
 		</dependency>
 		<!-- Weblogic JMS client deps -->
 		<dependency>

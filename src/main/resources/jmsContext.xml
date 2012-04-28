@@ -15,8 +15,6 @@
 	<!-- Pull in the jndi environment properties used to create the JNDI initial context -->
 	<util:properties id="jndiEnv" location="classpath:/jndi.properties" />
 
-	<bean id="jmsDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver" />
-
 	<!-- Create Spring beans representing JMS objects (connection factory, destination (queue), based on 
 		JNDI name lookups. These JMS object Spring beans can be referenced by other beans in the overall Spring 
 		container context -->
